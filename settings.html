@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="settings" content="width=device-width, initial-scale=1.0">
+    <title>설정창</title>
+    <link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+    <div class="container">
+        <h2>치지직 API 등록</h2>
+        <div>
+            <label for="clientID">클라이언트 ID:</label>
+            <input type="text" id="clientID" placeholder="fefb6bbb-00c2-497c-afc2-XXXXXXXXXXXX">
+        </div>
+        <div>
+            <label for="clientKEY">클라이언트 Secret:</label>
+            <input type="password" id="clientKEY" placeholder="입력값을 공유하지 마세요">
+        </div>
+        <button id="submitBtn">인증 요청</button>
+    </div>
+    <p><span class="hint" id="idHint">클라이언트 ID가 없으신가요?</span></p>
+   <script src="settings.js"></script>
+</body>
+</html>

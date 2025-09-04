@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>치지직 신청곡 리모컨</title>
+  <link rel="stylesheet" href="request-bot.css" />
+</head>
+<body>
+  <main class="app">
+    <!-- 좌측 상단: YouTube 프레임 -->
+    <div class="yt card">
+      <iframe
+        id="ytFrame"
+        src="about:blank"
+        title="YouTube video"
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      ></iframe>
+    </div>
+
+    <!-- 우측 상단: 신청곡 리스트 -->
+    <section class="queue card">
+      <header class="section-head">
+        <h2>신청곡 목록</h2>
+        <div class="mini muted">!sr 채팅으로 유튜브 링크 메시지를 자동 수집</div>
+      </header>
+      <ul id="reqList" class="list"></ul>
+    </section>
+
+    <!-- 우측 하단: 옵션/입력 -->
+    <section class="controls card">
+      <header class="section-head">
+        <h2>옵션 · 입력</h2>
+      </header>
+
+      <div class="row options">
+        <button id="rbrunBtn" class="btn btn-ok" aria-pressed="false" title="채팅에서 링크 감지 시 자동 추가">
+          신청 받기 ON
+        </button>
+        <button id="nextBtn" class="btn" title="next">
+          다음곡 재생
+        </button>
+        <button id="inbgmBtn" class="btn" title="next">
+          곡 넣기
+        </button>
+      </div>
+
+
+      <div class="grid4">
+        <label class="field">
+          <span class="label">유튜브 링크</span>
+          <input id="inUrl" type="url" placeholder="https://www.youtube.com/watch?v=..." />
+          <span class="help muted">목록에 추가</span>
+        </label>
+        <label class="field">
+          <span class="label">대기열 곡 갯수 제한</span>
+          <input id="listlimit" type="text" placeholder="30" />
+        </label>
+        
+        <label class="field">
+          <span class="label">곡 갯수</span>
+          <input id="smn" type="text" placeholder="3" />
+        </label>
+        <label class="field">
+          <span class="label">슬로우 모드 지속시간 (분)</span>
+          <input id="smt" type="text" placeholder="6" />
+        </label>
+      </div>
+
+      <div class="hint muted">
+        주의사항 :<br>
+        채팅창에 !sr 유튜브 링크를 입력하면 감지합니다.<br>
+        신청 받기 ON 버튼을 누른 후 OFF로 보이면 켜진겁니다.<br>
+        치지직 스튜디오가 브라우저 창으로 켜져있어야합니다.<br>
+        일부 환경에서 재생이 안 된다면 애드가드 문제일 수 있습니다.<br>
+        다음곡 재생 버튼을 수동으로 눌러주셔야합니다 (자동화 미구현)<br>
+        CORS, CSP, MV3 정책과 싸웠지만 제가 졌습니다 제 역량 부족입니다
+      </div>
+    </section>
+  </main>
+  <script src="request-bot.js"></script>
+</body>
+</html>

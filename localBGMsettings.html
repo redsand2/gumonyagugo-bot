@@ -1,0 +1,373 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title> 방송 BGM 설정 </title>
+  <style>
+    :root {
+      --bg: #0e1118; --panel:#141a22; --text:#e8edf4; --muted:#9aa3b2; --accent:#6ea8fe;
+      --border:#25304a; --ok:#3ddc97; --warn:#ffb86b; --danger:#ff6b6b;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body { margin:0; background:var(--bg); color:var(--text); font-family:system-ui, -apple-system, Segoe UI, Roboto, 'Noto Sans KR', Arial; }
+    main { max-width: 1200px; margin: 0 auto; padding: 16px; }
+
+    h1 { margin: 6px 0 14px; font-size: 22px; }
+    h2 { margin: 14px 0 10px; font-size: 16px; color: var(--muted); }
+
+    .grid { display: grid; gap: 16px; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; }
+    .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+
+    /* 드래그 앤 드롭: 눈에 보이는 박스 + 화면 전체 수신 오버레이 */
+    .dropzone {
+      min-height: 220px; display:grid; place-items:center; text-align:center; gap:10px;
+      border: 2px dashed #334; border-radius: 12px; background: #0f1627aa;
+    }
+    .dropzone p { margin: 0; color: var(--muted); }
+    .drop-overlay {
+    position: fixed; inset: 0; display: none; place-items: center;
+    background: rgba(20,25,45,0.85); border: 3px dashed #6ea8fe; z-index: 9999;
+    pointer-events: none;
+    }
+    .drop-overlay.active { display: grid; }
+    .drop-overlay .big { font-size: 28px; color: #cfe2ff; text-align:center; padding: 12px; }
+
+    .controls { display:flex; flex-wrap:wrap; gap:8px; align-items:center; }
+    .right { margin-left: auto; color: var(--muted); }
+    .btn { background:#1b2340; border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:10px; cursor:pointer; }
+    .btn:hover { background:#202a54; }
+    .btn-ok { background:#1c3a30; border-color:#2e5a51; }
+    .btn-ok:hover { background:#2a6852; }
+    .btn-warn { background:#3f3320; border-color:#5a4b2e; }
+    .btn-warn:hover { background:#362c1e; }
+    .btn-danger { background:#3b1f22; border-color:#5a2e35; }
+    .btn-danger:hover { background:#45252a; }
+
+    .btn-ok[aria-pressed="true"] {
+      /* 정지 */
+      background:#3b1f22;
+      border-color:#5a2e35;
+    }
+    .btn-ok[aria-pressed="true"]:hover { background:#70272e; }
+
+    .btn-ok[aria-pressed="false"],
+    .btn-ok:not([aria-pressed="true"]) {
+      /* 재생 */
+      background:#1c3a30;
+      border-color:#2e5a51;
+    }
+    .btn-ok[aria-pressed="false"]:hover,
+    .btn-ok:not([aria-pressed="true"]):hover { background:#1e775a; }
+
+    /* 레이아웃: 4등분 설정 */
+    .cell-drop { grid-column: 1; grid-row: 1; }
+    .cell-queue { grid-column: 2; grid-row: 1; }
+    .cell-excluded { grid-column: 2; grid-row: 2; }
+    .cell-docs     { grid-column: 1; grid-row: 2; }
+
+    /* 목록 공통 */
+    ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:8px; }
+    .track {
+      display:grid; grid-template-columns: auto 1fr auto auto; gap:10px; align-items:center;
+      padding:10px; border:1px solid var(--border); border-radius:10px; background:#121829aa;
+    }
+    .track.playing { border-color: var(--accent); background:#1a2242aa; }
+    .name { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .badge { font-size:11px; padding:2px 6px; border:1px solid #39406a; border-radius:999px; color:#cdd6ff; background:#162040; }
+    .handle { cursor:grab; user-select:none; color:var(--muted); font-size:18px; padding:0 6px; }
+    .hint { color: var(--muted); font-size: 13px; margin-top: 6px; }
+
+    /* 드래그 가이드 */
+    .drop-marker { height:0; border-top:2px dashed var(--accent); margin:4px 0; }
+
+    .muted { color: var(--muted); }
+    .row { display:flex; gap:8px; align-items:center; }
+    #queueList, #excludedList {
+    max-height: 320px;   /* 필요하면 240~480px 등으로 조절 */
+    overflow-y: auto;
+    padding-right: 4px;  /* 스크롤바가 겹쳐 보이지 않게 여백 */
+    }
+
+    /* 목록 내 재생 토글 버튼 고정 폭 */
+    .track button[data-action="togglePlay"] {
+      width: 64px;         /* '재생'·'정지' 상관없이 동일 폭 */
+      flex: 0 0 64px;
+      white-space: nowrap;
+    }
+
+    /* 재생 진행 UI */
+    .progress-wrap { margin-top: 10px; }
+    .progress-top { display:flex; justify-content:space-between; font-size: 13px; color: var(--muted); }
+    #seekRange { width: 100%; margin: 6px 0; }
+    .progress-nav { display:flex; gap:8px; justify-content:flex-end; }
+
+    /* 테마 색상(원하면 값만 바꿔서 재사용) */
+:root {
+  --cb-accent: #6ea8fe;         /* 체크 시 배경/테두리 */
+  --cb-bg: #0f1627;             /* 평상시 배경(다크) */
+  --cb-border: #4a567e;         /* 평상시 테두리 */
+  --cb-hover: #7fb6ff;          /* 호버 강조 */
+}
+
+/* 라벨 줄 간격/정렬 보강(선택) */
+label.row { display: inline-flex; align-items: center; gap: 8px; }
+
+/* 기본 체크박스 모양 제거 후 커스텀 */
+#randomChk {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;              /* 크기 고정 */
+  height: 18px;
+  border: 2px solid var(--cb-border);
+  border-radius: 6px;       /* 둥근 사각형 */
+  background: var(--cb-bg);
+  display: grid;
+  place-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: border-color .15s ease, background-color .15s ease, box-shadow .15s ease, transform .02s;
+  position: relative;
+}
+
+/* 체크 표시(✓) */
+#randomChk::after {
+  content: "";
+  width: 6px;
+  height: 10px;
+  border-right: 2px solid white;
+  border-bottom: 2px solid white;
+  transform: rotate(45deg) scale(0);
+  transform-origin: center;
+  transition: transform .15s ease;
+}
+
+/* 상태: hover/focus/active */
+#randomChk:hover { border-color: var(--cb-hover); }
+#randomChk:active { transform: translateY(1px); }
+#randomChk:focus-visible {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--cb-accent) 30%, transparent);
+}
+
+/* 체크됐을 때 */
+#randomChk:checked {
+  background: var(--cb-accent);
+  border-color: var(--cb-accent);
+}
+#randomChk:checked::after {
+  transform: rotate(45deg) scale(1);
+}
+
+/* 비활성화 상태 */
+#randomChk:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
+/* 한 줄 배치(순서: handle → name → btn-danger → btn-ok → badge) */
+#queueList .track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;     /* 줄바꿈 방지 */
+}
+
+/* 1) handle */
+#queueList .track .handle {
+  order: 1;
+  flex: 0 0 40px;        /* 클릭/드래그 타깃 고정폭 */
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  font-size: 22px;
+  cursor: grab; user-select: none;
+}
+
+/* 2) name: 가변 폭(가운데 확장) */
+#queueList .track .name {
+  order: 2;
+  flex: 1 1 auto;
+  min-width: 0;          /* 넘침 방지로 ellipsis 유지 */
+}
+
+/* 삭제 버튼(삭제툴 on일 때 존재) */
+#queueList .track .btn.btn-danger,
+#queueList .track [data-action="delete"] {
+  order: 3;
+  flex: 0 0 72px;        /* 버튼 고정폭 */
+  white-space: nowrap;
+}
+
+/* 재생/정지 토글 버튼 */
+#queueList .track .btn.btn-ok {
+  order: 4;
+  flex: 0 0 72px;
+  white-space: nowrap;
+}
+
+/* 배지: 맨 오른쪽 정렬 */
+#queueList .track .badge {
+  order: 5;
+  margin-left: auto;     /* 오른쪽 끝으로 밀기 */
+}
+
+/* (옵션) 내리기 버튼이 있다면 맨 뒤로 */
+#queueList .track [data-action="down"] {
+  order: 3;
+  flex: 0 0 72px;
+  white-space: nowrap;
+}
+
+/* 전체반복 목록: 핸들 칼럼 폭을 넓히고 핸들 자체도 키움 */
+#queueList .track {
+  /* 핸들 | 이름 | (우측 컨트롤들) */
+  grid-template-columns: 48px 1fr auto auto auto; /* 기존이  auto 였다면 48px로 고정 */
+}
+
+#queueList .track .handle {
+  width: 58px;            /* 클릭/드래그 타깃 크기 */
+  height: 58px;
+  font-size: 25px;        /* '≡' 아이콘 크기 */
+  display: grid;
+  place-items: center;    /* 가운데 정렬 */
+  cursor: grab;
+  user-select: none;
+}
+
+#queueList .track .handle:active { cursor: grabbing; }
+
+/* 일시제외 목록에도 동일 적용하려면 */
+#excludedList .track .handle {
+  width: 40px; height: 40px; font-size: 24px;
+  display: grid; place-items: center; cursor: grab; user-select: none;
+}
+
+/* 볼륨 컨트롤 스타일 */
+.volume-control {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+  padding: 5px 10px;
+  background: var(--panel);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.volume-icon {
+  margin-right: 8px;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+#volumeSlider {
+  flex-grow: 1;
+  height: 5px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 5px;
+  outline: none;
+}
+
+#volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+#volumeSlider::-moz-range-thumb {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+  </style>
+</head>
+<body>
+  <!-- 화면 전체 드롭 수신 오버레이 -->
+  <div class="drop-overlay" id="dropOverlay">
+  </div>
+
+  <main>
+    <h1>방송 BGM 설정</h1>
+
+    <div class="grid">
+      <!-- 1) 드래그앤드롭 박스 (좌상) -->
+      <section class="panel cell-drop">
+        <h2>BGM 불러오기</h2>
+        <div id="dropzone" class="dropzone">
+          <div>
+            <p>드래그 앤 드롭 가능</p>
+            <div class="row" style="justify-content:center;margin-top:4px;">
+              <button id="pickBtn" class="btn btn-ok">파일 선택</button>
+              <input id="fileInput" type="file" accept="audio/*" multiple hidden />
+            </div>
+            <div class="hint">여기에 음악 파일을 불러오쇼</div>
+          </div>
+        </div>
+
+        <h2 style="margin-top:14px;"></h2>
+        <div class="controls">
+          <button id="playToggle" class="btn btn-ok" aria-pressed="false">전체재생</button>
+          <button id="repeatToggle" class="btn">단일반복</button>
+          <label class="row"><input type="checkbox" id="randomChk" /> 랜덤</label>
+          <button id="deleteTool" class="btn btn-warn" aria-pressed="false" title="삭제툴 토글">삭제툴</button>
+          <div class="right">재생 중인 곡: <span id="nowPlaying">-</span></div>
+        </div>
+        <div class="progress-wrap">
+        <div class="progress-top">
+          <span id="posText">00:00</span>
+          <span id="durText">00:00</span>
+        </div>
+        <input id="seekRange" type="range" min="0" step="0.1" value="0" />
+        <div class="volume-control">
+          <span class="volume-icon">🔊</span>
+          <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.7">
+        </div>
+        <div class="progress-nav">
+          <button id="prevBtn" class="btn">이전곡</button>
+          <button id="nextBtn" class="btn">다음곡</button>
+        </div>
+      </div>
+      </section>
+
+      <!-- 전체반복 목록 (우상) -->
+      <section class="panel cell-queue">
+        <h2> BGM 목록</h2>
+        <ul id="queueList"></ul>
+        <h2 style="margin-top:2px;"></h2>
+        <div class="hint">
+          - 항목을 드래그해 순서 변경 가능<br/>
+          - 항목 더블클릭해도 재생됩니다
+        </div>
+      </section>
+
+      <!-- 오하 설명 -->
+      <section class="panel cell-docs">
+        <h2>설명</h2>
+        <div class="hint" style="line-height:1.6;">
+          반복 설정이 "전체반복"이면 다음 곡으로, "한곡반복"이면 한 곡만 반복 재생됩니다.<br/>
+          "내리기"로 일시제외 목록으로 내리고, 제외된 곡은 전체반복 재생에서 건너뜁니다. "올리기"로 다시 복귀합니다.<br/>
+          "삭제툴"을 켜면 항목 버튼이 "삭제"로 바뀌며 이 곳에서 사라집니다. (이 페이지에서만 사라집니다)<br/>
+          랜덤 옵션은 임시순서를 생성해 반복재생합니다. 실제 리스트에 있는 곡 순서는 바뀌지 않습니다.
+        </div>
+      </section>
+
+      <!-- 일시제외 목록 (우하) -->
+      <section class="panel cell-excluded">
+        <h2>반복제외 목록</h2>
+        <ul id="excludedList"></ul>
+        <div class="hint" style="line-height:1.6;">
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="localBGMsettings.js"></script>
+</body>
+</html>

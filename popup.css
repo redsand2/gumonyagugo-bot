@@ -1,0 +1,104 @@
+body {
+  width: 250px; /* 전체 팝업 너비 늘림 */
+  min-height: 100px; /* 전체 팝업 높이 조절 */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* 항목 간 간격 줄임 */
+  padding: 15px; /* 내부 여백 조절 */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+}
+
+/* 각 행 컨테이너 (토글과 버튼을 같은 줄에) */
+.row-container {
+  display: flex;
+  justify-content: space-between; /* 양 끝 정렬 */
+  align-items: center; /* 세로 중앙 정렬 */
+  width: 100%; /* 너비 꽉 채우기 */
+  padding: 5px 0;
+  border-bottom: 1px solid #eee; /* 구분선 */
+}
+.row-container:last-child {
+    border-bottom: none; /* 마지막 줄은 구분선 없음 */
+}
+
+/* 토글 스위치와 텍스트 그룹 (좌측 배치) */
+.toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* 텍스트와 토글 간격 */
+}
+
+.status-text {
+  min-width: 60px; /* 텍스트 최소 너비 */
+  font-weight: bold;
+  text-align: right; /* 텍스트 오른쪽 정렬 */
+  flex-shrink: 0;
+}
+
+/* 토글 스위치 스타일 */
+.toggle {
+  position: relative;
+  display: inline-block;
+  width: 50px; /* 토글 너비 줄임 */
+  height: 28px; /* 토글 높이 줄임 */
+  flex-shrink: 0;
+}
+.toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .4s;
+  border-radius: 28px; /* 높이에 맞춤 */
+}
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 20px; /* 원 크기 조절 */
+  width: 20px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: .4s;
+  border-radius: 50%;
+}
+input:checked + .slider {
+  background-color: #4CAF50; /* 체크 시 색상 변경 (경찰/BGM) */
+}
+input:checked + .slider:before {
+  transform: translateX(22px); /* 이동 거리 조절 */
+}
+
+/* 일반 버튼 스타일 */
+.button {
+  padding: 8px 12px; /* 버튼 패딩 */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s;
+  min-width: 80px; /* 버튼 최소 너비 */
+  background-color: #007bff; /* 기본 버튼 색상 */
+  color: white;
+  text-align: center;
+}
+.button:hover {
+  background-color: #0056b3;
+}
+/* 설정 버튼은 별도 색상 */
+.button.settings {
+  background-color: #6c757d;
+}
+.button.settings:hover {
+  background-color: #5a6268;
+}

@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "그뭐냐그거",
+  "version": "1.0.0",
+  "background": { 
+    "service_worker": "background.js", 
+    "type": "module" 
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+    "matches": ["*://*.naver.com/*", "*://*.youtube.com/embed/*"],
+    "js": ["content-script.js"],
+    "all_frames": true,
+    "run_at": "document_start"
+    }
+  ],
+  "permissions": ["scripting", "tabs", "webNavigation", "activeTab", "storage", "unlimitedStorage"],
+  "host_permissions": [
+    "https://studio.chzzk.naver.com/*",
+    "https://*.youtube.com/*",
+    "https://www.youtube-nocookie.com/*",
+    "*://*.naver.com/*"
+    ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; frame-src https://*.youtube.com https://www.youtube-nocookie.com; child-src https://*.youtube.com https://www.youtube-nocookie.com"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["injected-script.js", "injected-script_.js"],
+      "matches": ["https://studio.chzzk.naver.com/*", "*://*.naver.com/*"]
+    }
+  ],
+  "externally_connectable": {
+  "matches": ["https://studio.chzzk.naver.com/*", "*://*.naver.com/*"]
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}
