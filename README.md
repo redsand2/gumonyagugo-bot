@@ -1,8 +1,10 @@
 # 그뭐냐그거-bot은
-크롬 확장프로그램으로 제공됩니다.
-chrome://extensions/ 에 드래그 앤 드롭하면 설치됩니다.
 스트리머와 시청자의 원활한 상호작용을 돕기 위해 개발된 다기능 챗봇입니다.
 영상 후원(영도) 시의 BGM/YouTube 자동 제어, 효율적인 BGM 관리, 그리고 치지직 채팅을 통한 시청자 신청곡 시스템을 제공합니다.
+
+
+### 크롬 웹 스토어에서 간단설치
+https://chromewebstore.google.com/detail/jhenilfdobldepedabpjpaioncfiafjk?utm_source=item-share-cb
 
 
 ### 영상 후원 (영도) 자동 제어
