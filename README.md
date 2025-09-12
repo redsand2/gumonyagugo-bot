@@ -3,8 +3,12 @@
 영상 후원(영도) 시의 BGM/YouTube 자동 제어, 효율적인 BGM 관리, 그리고 치지직 채팅을 통한 시청자 신청곡 시스템을 제공합니다.
 
 
+
+
 ### 크롬 웹 스토어에서 간단설치
 https://chromewebstore.google.com/detail/jhenilfdobldepedabpjpaioncfiafjk?utm_source=item-share-cb
+
+
 
 
 ### 영상 후원 (영도) 자동 제어
@@ -12,9 +16,13 @@ https://chromewebstore.google.com/detail/jhenilfdobldepedabpjpaioncfiafjk?utm_so
 영도 종료 후에는 BGM이나 YouTube 영상이 자동으로 재재생되어, 방송 흐름을 끊김 없이 유지할 수 있습니다. (Youtube ON 스위치 활성화 시 YouTube 제어)
 
 
+
+
 ### BGM 관리 시스템
 'BGM' 버튼을 클릭하면 별도로 마련된 BGM 관리 플레이어가 실행됩니다.
 음성 파일을 불러오는 과정에서 자동으로 소리 크기를 표준화하여 변환해주어, 매번 수동으로 볼륨을 조절할 필요 없이 균일한 음량으로 BGM을 관리할 수 있습니다.
+
+
 
 
 ### 치지직 신청곡 연동
